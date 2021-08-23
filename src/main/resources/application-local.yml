@@ -1,0 +1,68 @@
+logging:
+  config: classpath:logs/logback-local.xml
+
+spring:
+  devtools:
+    livereload:
+      enabled: true
+    remote:
+      restart:
+        enabled: true
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+#        default_batch_fetch_size: 100
+#        generate_statistics: true
+#        order_inserts: true
+#        order_updates: true
+#        jdbc:
+#          batch_size: 100
+#          batch_versioned_data: true
+    show-sql: true
+
+eureka:
+  client:
+    enabled: off
+
+# OpenAPI Swagger setting
+springdoc:
+  api-docs:
+    groups:
+      enabled: true
+    # springdoc-openapi 엔드포인트 활성화
+    enabled: true
+    # /api-docs endpoint custom path
+    path: /v3/api-docs
+  swagger-ui:
+    # Swagger-UI 활성화
+    enabled: true
+    # swagger-ui custom path
+    #    path: /swagger-ui.html
+    # 기본 PetStore Swagger 비활성화
+    disable-swagger-default-url: true
+    display-request-duration: true
+    groups-order: DESC
+    operationsSorter: method
+    tagsSorter: alpha
+    display-query-params-without-oauth2: true
+  group-configs:
+  - group: skeleton
+    paths-to-match: /api/v1/skeleton/**
+  - group: tutorial
+    paths-to-match: /tutorial/**
+# Packages to include ex) com.package1, com.package2
+#    packages-to-scan: com.skeleton
+  #  cache:
+  #    disabled: true
+  # Paths to include
+#  paths-to-match: /api/**, /tutorial/**
+  # 액추에이터 포트에 swagger-ui 노출(설정시 Swagger UI 동작안됨 설정확인)
+  #use-management-port: true
+  # swagger-ui에 액추에이터 끝점을 표시
+  show-actuator: true
+
+feign:
+  # feignClient URL Properties 정리
+  target-api:
+    feign: http://localhost:9002

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true">
+    <include resource="logs/default-log-constant.xml"/>
+    <include resource="logs/default-log-setting.xml"/>
+
+    <!-- Slack 메신저에 ERROR 메세지 전송 -->
+    <appender name="SLACK" class="com.skeleton.common.exception.slack.appender.SlackAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <level>ERROR</level>
+        <enabled>true</enabled>
+        <token>${HOOK_URL_PROD}</token>
+        <channel>${SLACK_CHANNEL_PROD}</channel>
+        <title>${DEFAULT_TITLE}</title>
+        <botName>${DEFAULT_BOT_NAME}</botName>
+        <botEmoji>${DEFAULT_BOT_EMOJI}</botEmoji>
+    </appender>
+    <!-- Slack 메신저 에러 비동기 전송 처리 -->
+    <appender name="ASYNC_SLACK" class="ch.qos.logback.classic.AsyncAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <appender-ref ref="SLACK" />
+    </appender>
+
+    <!-- additivity="false" 사용시 아래의 logger가 상속 받지 않는다 default 는 true -->
+    <logger name="com.skeleton" level="INFO"/>
+    <logger name="org.hibernate.validator" level="INFO"/>
+
+    <!--dev의 기본 패키지 로그 레벨은 DEBUG로 잡고 appender 등록, 기존의 default-log-setting.xml 파일 내의 spring 로그 레벨은 info로 등록-->
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="DEFAULT_LOG_APPENDER"/>
+        <appender-ref ref="DEFAULT_ERROR_LOG_APPENDER"/>
+        <appender-ref ref="ASYNC_SLACK"/>
+    </root>
+</configuration>

@@ -1,0 +1,73 @@
+logging:
+  config: classpath:logs/logback-dev.xml
+
+spring:
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+
+eureka:
+  instance:
+    # 서비스 이름 대신 IP 주소 등록
+    prefer-ip-address: true
+    # Necessary for Docker otherwise you will get 172.0.0.x IP
+    ip-address: ${SERVER_IP:127.0.0.1}
+    #hostname: ${spring.application.name}
+  client:
+    # 유레카 서버에 서비스 등록
+    register-with-eureka: true
+    # 레지스트리 정보를 로컬에 캐싱
+    fetch-registry: true
+    service-url:
+      defaultZone: http://${EUREKA_SERVER1:172.1.1.1}:8761/eureka
+      healthcheck:
+        enabled: true
+      # 유레카 클라이언트의 레지스트리를 받아오는 주기를 조정.
+    registry-fetch-interval-seconds: 3 # 서비스 목록 5초마다 캐싱(default : 30초)
+    disable-delta: true #캐싱할 때 변경된 부분만 업데이트(default : false)
+    # 유레카 클라이언트 속성 변경 새로고침 비활성화
+    # 새로 고침이 발생하면 클라이언트가 Eureka 서버에서 등록 취소되고 주어진 서비스의 모든 인스턴스를 사용할 수 없는 짧은 시간이 있을 수 있음
+    # 이를 방지하는 한 가지 방법은 이 속성을 비활성화 하는 것임
+    refresh:
+      enable: false
+
+# OpenAPI Swagger setting
+springdoc:
+  api-docs:
+#    groups:
+#      enabled: true
+    # springdoc-openapi 엔드포인트 활성화
+    enabled: true
+    # /api-docs endpoint custom path
+    path: /v3/api-docs
+  swagger-ui:
+    # Swagger-UI 활성화
+    enabled: true
+    # swagger-ui custom path
+    #    path: /swagger-ui.html
+    # 기본 PetStore Swagger 비활성화
+    disable-swagger-default-url: true
+    display-request-duration: true
+    groups-order: DESC
+    operationsSorter: method
+    tagsSorter: alpha
+    display-query-params-without-oauth2: true
+#  group-configs:
+#  - group: skeleton
+#    paths-to-match: /api/v1/skeleton/**
+#  - group: tutorial
+#    paths-to-match: /tutorial/**
+# Packages to include ex) com.package1, com.package2
+#    packages-to-scan: com.skeleton
+
+  #  cache:
+  #    disabled: true
+  # Paths to include
+  paths-to-match: /api/**
+  # 액추에이터 포트에 swagger-ui 노출(설정시 Swagger UI 동작안됨 설정확인)
+  #use-management-port: true
+  # swagger-ui에 액추에이터 끝점을 표시
+  show-actuator: true
+  app-url: https://apis-dev.com/api
+  app-description: Development API URL

@@ -1,0 +1,169 @@
+## 서비스 설정
+server:
+  port: ${HOST_PORT:9001}
+  # kill -15 : 정상 종료
+  # kill -9 : 강제 종료
+  shutdown: graceful
+
+spring:
+  profiles:
+#    active: my
+    active: local
+  servlet:
+    multipart:
+      ## 멀티파트 업로드 지원여부 (default: true)
+      enabled: true
+      ## 업로드된 파일의 임시 저장 공간
+      ## TEMP 파일 경로 지정시 절대경로 지정 default: ${java.io.tmpdir}
+      ## ${user.dir}/tmpfiles 는 현재 프로젝트에 tmpfiles
+      ## ${user.home}/${service.name}/tmpfiles 는 USER HOME 디렉토리에 rcs/tmpfiles
+#      location: ${user.dir}/tmpfiles
+      ## 파일의 최대 사이즈 (default: 1MB) 파일당 최대 파일 크기이다
+      max-file-size: 5MB
+      ## 요청의 최대 사이즈 (default: 10MB)
+      ## 파일 한 개의 용량이 아니라 multipart/form-data 요청당 최대 파일 크기이다 (여러 파일 업로드 시 총 크기로 보면 된다)
+      max-request-size: -1
+      ## 파일이 메모리에 기록되는 임계값 (default: 0B)
+      ## 파일의 크기가 fize-size-threshold 값을 초과한다면 파일은 location 경로에 저장되어 해당 파일을 읽어서 작업
+      file-size-threshold: 1MB
+  application:
+    # Eureka 서비스명
+    name: skeleton-apis
+    version: V0.01
+#  autoconfigure:
+#    exclude:
+#      - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+#      - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
+  datasource:
+    #url: jdbc:postgresql://localhost:5432/postgres
+    url: jdbc:mysql://database:3306/company?serverTimezone=Asia/Seoul&useSSL=false&rewriteBatchedStatements=true
+    username: id
+    password: password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    mongodb:
+      uri: mongodb+srv://id:password@cluster0.abcd.mongodb.net/mongo?retryWrites=true&w=majority
+      database: mongo
+  jpa:
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: com.vladmihalcea.hibernate.type.util.CamelCaseToSnakeCaseNamingStrategy
+    properties:
+      hibernate:
+#        format_sql: true
+        default_batch_fetch_size: 100
+#        jdbc:
+#          batch_size: 100
+#          batch_versioned_data: true
+        order_inserts: true
+        order_updates: true
+    database: mysql
+    database-platform: com.skeleton.common.config.MySQLCustomDialect
+  cloud:
+    config:
+      enabled: false
+    inetutils:
+      preferred-networks: # 선호하는 IP 주소 설정(필수가 아닌 선호이다)
+        - 172.1
+        - 172.2
+      ignored-interfaces: # 해당 인터페이스 무시
+        - br-*
+        - docker*
+        - lo*
+        - veth*
+    client:
+      hostname: ${SERVER_IP:localhost}
+#  redis:
+#    host: local
+#    port: 6379
+#    password: devredis
+#    lettuce:
+#      pool:
+#        max-wait: 100
+#        max-active: 500
+#        max-idle: 500
+#        min-idle: 50
+#    connect-timeout: 500
+  main:
+    allow-bean-definition-overriding: true
+  jackson:
+    serialization:
+      FAIL_ON_EMPTY_BEANS: false
+
+feign:
+  client:
+    config:
+      feignName: # @FeignClient에서 name 값, 전역으로 설정하려면 default
+        loggerLevel: BASIC #full
+        # feign의 전역 timeout 설정 : 5초
+        connectTimeout: 5000
+        readTimeout: 5000
+  #        errorDecoder: com.example.SimpleErrorDecoder
+  #        retryer: com.example.SimpleRetryer
+  #        requestInterceptors:
+  #          - com.example.FooRequestInterceptor
+  #          - com.example.BarRequestInterceptor
+  #        decode404: false
+  #        encoder: com.example.SimpleEncoder
+  #        decoder: com.example.SimpleDecoder
+  #        contract: com.example.SimpleContract
+  #  main:
+  #    allow-bean-definition-overriding: true
+  # feignClient URL Properties 정리
+  target-api:
+    app: https://apis-dev.com/feign
+
+## AWS 정보 셋팅
+cloud:
+  aws:
+    # AWS S3 bucket의 정보
+    s3:
+      bucket: storage.test.com
+      domain: https://storage.test.com.s3.ap-northeast-2.amazonaws.com
+      download: https://storage.test.com
+    region:
+      static: ap-northeast-2
+    stack:
+      # EC2에서 Spring Cloud 프로젝트를 실행시키면 기본으로 CloudFormation 구성을 시작합니다.
+      # 설정한 CloudFormation이 없으면 false
+      auto: false
+    # AWS 마스터 계정 또는 IAMUSER 정보
+    credentials:
+      # AWS의 instanceProfile를 사용
+      instanceProfile: true
+      # AWS S3 KEY
+      # AWS S3 KEY
+      accessKey: ABVSDASDA
+      secretKey: ASDADASDASD
+
+# monitoring setting
+management:
+  metrics:
+    tags:
+      application: skeleton-apis
+  endpoint:
+    shutdown:
+      enabled: false
+
+  endpoints:
+    web:
+      exposure:
+        include: refresh,health,beans,busrefresh,info,prometheus,metrics
+
+springdoc:
+  version: ${spring.application.version}
+  app-url: http://localhost:${server.port}
+  app-description: Default Skeleton URL
+  app-title: Skeleton API
+
+# security
+security:
+  jwt:
+    secret-key: skeleton-dev-a12zs33zaedfeeaa
+    expire-time:
+      access-token: 1800   # 30M
+      refresh-token: 2592000  # 30D
+
+greeting:
+  message: Hellow World!

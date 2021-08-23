@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 로그 상수 설정 -->
+<included>
+<!--    <property name="CONSOLE_LOG_PATTERN">[%d][%highlight(%-5level)] %magenta(%-4relative) [%boldYellow(%t)] %cyan(%logger{30}) [%boldGreen(%method:%line)] - %msg%n%throwable</property>-->
+<!--    <property name="CONSOLE_LOG_PATTERN" value="${CONSOLE_LOG_PATTERN:-%clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(-&#45;&#45;){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>-->
+<!--    <property name="CONSOLE_LOG_CHARSET" value="${CONSOLE_LOG_CHARSET:-default}"/>-->
+<!--    <property name="FILE_LOG_PATTERN" value="${FILE_LOG_PATTERN:-%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } -&#45;&#45; [%t] %-40.40logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>-->
+<!--    <property name="FILE_LOG_CHARSET" value="${FILE_LOG_CHARSET:-default}"/>-->
+
+    <!-- 기본 로그 경로 -->
+    <property name="DEFAULT_LOG_HOME" value="logs"/>
+    <!-- ERROR 로그 경로 -->
+    <property name="DEFAULT_ERROR_LOG_HOME" value="logs"/>
+
+    <!-- 운영서버가 아닌 서버의 최대 로그 저장 기간 -->
+    <property name="DEFAULT_MAX_HISTORY" value="10" />
+    <!-- 운영서버 최대 로그 저장 기간 -->
+    <property name="PROD_MAX_HISTORY" value="90" />
+    <!-- 최대 로그 파일 사이즈 MB -->
+    <property name="DEFAULT_MAX_FILESIZE" value="500MB" />
+
+    <!-- 기본 BOT TITLE -->
+    <property name="DEFAULT_TITLE" value="서비스 장애 감지"/>
+    <!-- 기본 BOT 이미지 URL -->
+    <property name="DEFAULT_BOT_IMAGE_URL" value="https://cdn3.iconfinder.com/data/icons/chat-bot-emoji-filled-color/300/14157797Untitled-3-512.png"/>
+    <!-- 기본 BOT NAME -->
+    <property name="DEFAULT_BOT_NAME" value="Skeleton"/>
+    <!-- 기본 BOT EMOJI -->
+    <property name="DEFAULT_BOT_EMOJI" value=":exclamation:"/>
+
+    <property name="SLACK_CHANNEL_LOCAL" value="develop-alert"/>
+    <property name="SLACK_CHANNEL_DEV" value="develop-alert"/>
+    <property name="SLACK_CHANNEL_STAGE" value="stage-alert"/>
+    <property name="SLACK_CHANNEL_PROD" value="prod-alert"/>
+    <!-- HOOK LOCAL URL -->
+    <property name="HOOK_URL_LOCAL" value="https://hooks.slack.com/services/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+    <!-- HOOK DEV URL -->
+    <property name="HOOK_URL_DEV" value="https://hooks.slack.com/services/BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"/>
+    <!-- HOOK STAGE URL -->
+    <property name="HOOK_URL_STAGE" value="https://hooks.slack.com/services/CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"/>
+    <!-- HOOK PROD URL -->
+    <property name="HOOK_URL_PROD" value="https://hooks.slack.com/services/DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"/>
+</included>

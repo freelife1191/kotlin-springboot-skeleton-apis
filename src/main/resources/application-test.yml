@@ -1,0 +1,83 @@
+logging:
+  config: classpath:logs/logback-local.xml
+
+spring:
+  devtools:
+    livereload:
+      enabled: true
+    remote:
+      restart:
+        enabled: true
+  datasource:
+#    name: testdb
+    platform: h2
+    
+    #url: jdbc:h2:tcp://localhost/~/test
+    #url: jdbc:h2:tcp://localhost/~/querydsl
+#    MODE=MySQL;
+    url: jdbc:h2:~/test;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false;DB_CLOSE_ON_EXIT=FALSE;
+#    url: jdbc:h2:tcp://localhost/~/kotlin
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  h2:
+    console:
+      ## h2 console 사용
+      enabled: true
+      ## /h2 로 접속 지정하지 않으면 /h2-console 로 접속
+      path: /h2
+  jpa:
+    generate-ddl: true
+    hibernate:
+      ddl-auto: create
+      naming:
+        physical-strategy: com.vladmihalcea.hibernate.type.util.CamelCaseToSnakeCaseNamingStrategy
+    properties:
+      hibernate:
+        format_sql: true
+#        default_schema: testdb
+    show-sql: true
+    database: h2
+
+eureka:
+  client:
+    enabled: off
+
+# OpenAPI Swagger setting
+springdoc:
+  version: '@springdoc.version@'
+  api-docs:
+    groups:
+      enabled: true
+    # springdoc-openapi 엔드포인트 활성화
+    enabled: true
+    # /api-docs endpoint custom path
+    path: /v3/api-docs
+  swagger-ui:
+    # Swagger-UI 활성화
+    enabled: true
+    # swagger-ui custom path
+    #    path: /swagger-ui.html
+    # 기본 PetStore Swagger 비활성화
+    disable-swagger-default-url: true
+    display-request-duration: true
+    groups-order: DESC
+    operationsSorter: method
+    tagsSorter: alpha
+    display-query-params-without-oauth2: true
+  group-configs:
+  - group: skeleton
+    paths-to-match: /api/v1/skeleton/**
+  - group: tutorial
+    paths-to-match: /tutorial/**
+# Packages to include ex) com.package1, com.package2
+#    packages-to-scan: com.skeleton
+  
+  #  cache:
+  #    disabled: true
+  # Paths to include
+  #  paths-to-match: /api/**, /tutorial/**
+  # 액추에이터 포트에 swagger-ui 노출(설정시 Swagger UI 동작안됨 설정확인)
+  #use-management-port: true
+  # swagger-ui에 액추에이터 끝점을 표시
+  show-actuator: true

@@ -1,0 +1,50 @@
+## docker-compose 버전 3버전의 최신버전을 셋팅
+version: '3'
+
+services:
+  ## 서비스명 docker-compose up -d [서비스명] 으로
+  ## 여러 서비스가 있으면 해당 서비스만 구동할 수 있다
+  ## 서비스명이 중복되면 오류가 발생하므로 서비스되는 서비스명으로 변경 해야 한다
+  ## SERVICE 명(jar 파일 이름 앞자리와 동일해야함, docker-compose '서비스명-profile'과 같아야함 ex - service-dev)
+  skeleton-apis:
+    ## 빌드시 생성되는 이미지명과 태그명을 auto_apply.sh 로부터 전달 받아서 지정한다
+    image: ${IMAGE_NAME}
+    ## 컨테이너 명을 auto_apply.sh 로부터 전달 받아서 지정한다
+    container_name: "skeleton-apis-${CONTAINER_TYPE}"
+    ## 항상 재기동되는 옵션
+    # no: 문제가 발생하여 Container가 중지된 경우 재시작 하지 않음 (default)
+    # always: 어떠한 문제로 Container가 중지되는 경우 무조건 재시작
+    # on-failure: 컨테이너가 오직 에러로 인해 중단 되었을 경우에만 다시 시작시킨다
+    # unless-stopped: 우리가 강제적으로 중단 시킨게 아니라면 항상 컨테이너를 다시 시작 시킨다
+    restart: always
+    ## HOST 포트와 컨테이너 포트를 auto_apply.sh 로부터 전달 받아서 지정한다
+    ports:
+      - ${HOST_PORT}:${HOST_PORT}
+    ## 컨테이너만 공개하는 포트
+    expose:
+      - ${HOST_PORT}
+    networks:
+      - msa-network
+    user: 1000:1000
+    ## Docker 컨테이너와 HOST 디렉토리를 맵핑
+    volumes:
+      - ./logs:/home/ubuntu/logs
+      - /etc/localtime:/etc/localtime:ro
+    ## container hostname 지정. (deploy.sh 에서 지정)
+    hostname: ${HOST_NAME}
+    ## aws cloudwatch agent 가 systemctl 로 작동됨.
+    privileged: true
+    environment:
+      ## 한국 시간 설정
+      TZ: 'Asia/Seoul'
+      COMPOSE_PROJECT_NAME: 'skeleton-apis'
+      ZONE: '${ZONE}'
+      HOST_PORT: '${HOST_PORT}'
+      SERVER_IP: '${SERVER_IP}'
+      PUBLIC_SERVER_IP: '${PUBLIC_SERVER_IP}'
+      EUREKA_SERVER1: '${EUREKA_SERVER1}'
+      EUREKA_SERVER2: '${EUREKA_SERVER2}'
+      #EUREKA_SERVER_URI: "http://${SERVER_IP}:8761/eureka"
+networks:
+  msa-network:
+    external: true

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 로그 APPENDER 및 기본 로그 셋팅 -->
+<included>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </layout>
+    </appender>
+
+    <appender name="DEFAULT_ERROR_LOG_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${DEFAULT_ERROR_LOG_HOME}/error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${DEFAULT_ERROR_LOG_HOME}/archived/error.%d{yyyy-MM-dd}.%i.log.zip</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>${DEFAULT_MAX_FILESIZE:-500MB}</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <springProfile name="!prod">
+                <maxHistory>${DEFAULT_MAX_HISTORY:-10}</maxHistory>
+            </springProfile>
+            <springProfile name="prod">
+                <maxHistory>${PROD_MAX_HISTORY:-90}</maxHistory>
+            </springProfile>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <charset>UTF-8</charset>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="DEFAULT_LOG_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${DEFAULT_LOG_HOME}/api.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${DEFAULT_LOG_HOME}/archived/api.%d{yyyy-MM-dd}.%i.log.zip</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>${DEFAULT_MAX_FILESIZE:-500MB}</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <springProfile name="!prod">
+                <maxHistory>${DEFAULT_MAX_HISTORY:-10}</maxHistory>
+            </springProfile>
+            <springProfile name="prod">
+                <maxHistory>${PROD_MAX_HISTORY:-90}</maxHistory>
+            </springProfile>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <springProfile name="!prod">
+                <level>DEBUG</level>
+            </springProfile>
+            <springProfile name="prod">
+                <level>INFO</level>
+            </springProfile>
+        </filter>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <charset>UTF-8</charset>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+    <!-- 스프링 프레임워크에서 찍는건 level을 info로 설정 -->
+    <logger name="org.springframework" level="INFO"/>
+    <!-- DiscoveryClient WARN -->
+    <logger name="com.netflix.discovery.DiscoveryClient" level="WARN"/>
+    <!-- ConfigClusterResolver WARN -->
+    <logger name="com.netflix.discovery.shared.resolver.aws.ConfigClusterResolver" level="WARN"/>
+    <!-- rolling file에는 debug, console에는 info 분리하여 처리 가능하다. -->
+    <logger name="io.swagger" level="WARN" additivity="false"/>
+    <!-- EC2 환경이 아니라 로컬환경이면 SdkClientException 나는 부분 안보이게 처리 -->
+    <!-- https://github.com/spring-cloud/spring-cloud-aws/issues/532 -->
+    <logger name="com.amazonaws" level="error" additivity="false"/>
+
+</included>
