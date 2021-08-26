@@ -26,19 +26,6 @@ cloud:
       bucket: storage.prod.com
       domain: https://storage.test.com.s3.ap-northeast-2.amazonaws.com
       dwonload: https://storage.test.com
-    region:
-      static: ap-northeast-2
-    stack:
-      # EC2에서 Spring Cloud 프로젝트를 실행시키면 기본으로 CloudFormation 구성을 시작합니다.
-      # 설정한 CloudFormation이 없으면 false
-      auto: false
-    # AWS 마스터 계정 또는 IAMUSER 정보
-    credentials:
-      # AWS의 instanceProfile를 사용
-      instanceProfile: true
-      # AWS S3 KEY
-      accessKey: ABVSDASDA
-      secretKey: ASDADASDASD
 
 eureka:
   instance:

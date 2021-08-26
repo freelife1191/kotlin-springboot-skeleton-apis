@@ -29,6 +29,8 @@ services:
     ## Docker 컨테이너와 HOST 디렉토리를 맵핑
     volumes:
       - ./logs:/home/ubuntu/logs
+      - ./tmp:/home/ubuntu/tmp
+      - ./files:/home/ubuntu/files
       - /etc/localtime:/etc/localtime:ro
     ## container hostname 지정. (deploy.sh 에서 지정)
     hostname: ${HOST_NAME}
@@ -44,6 +46,8 @@ services:
       PUBLIC_SERVER_IP: '${PUBLIC_SERVER_IP}'
       EUREKA_SERVER1: '${EUREKA_SERVER1}'
       EUREKA_SERVER2: '${EUREKA_SERVER2}'
+      AWS_ACCESS_KEY_ID: '${S3_AWS_ACCESS_KEY_ID}'
+      AWS_SECRET_ACCESS_KEY: '${S3_AWS_SECRET_ACCESS_KEY}'
       #EUREKA_SERVER_URI: "http://${SERVER_IP}:8761/eureka"
 networks:
   msa-network:

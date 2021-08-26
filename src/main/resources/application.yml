@@ -133,9 +133,8 @@ cloud:
       # AWS의 instanceProfile를 사용
       instanceProfile: true
       # AWS S3 KEY
-      # AWS S3 KEY
-      accessKey: ABVSDASDA
-      secretKey: ASDADASDASD
+      accessKey: ${AWS_ACCESS_KEY_ID}
+      secretKey: ${AWS_SECRET_ACCESS_KEY}
 
 # monitoring setting
 management:

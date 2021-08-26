@@ -1,8 +1,14 @@
 #!/bin/bash
 
+export ZONE=${ZONE:-zone1}
+
 # 처리할 PROFILE
 PROFILE=${PROFILE:-prod}
 echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-0] PROFILE=${PROFILE}" | tee deploy.log
+
+AWS_ACCESS_KEY_ID=${ECR_AWS_ACCESS_KEY_ID}
+AWS_SECRET_ACCESS_KEY=${ECR_AWS_SECRET_ACCESS_KEY}
+AWS_ECR_PRIVATE_DOMAIN=${AWS_ECR_PRIVATE_DOMAIN}
 
 if [ "${PROFILE}" == "prod" ]; then
   EUREKA_DOMAIN=${EUREKA_DOMAIN:-'https://eureka.skeleton.com'}
@@ -36,14 +42,20 @@ if [ $AWSCLI_INSTALL -ne 1 ];then
   sudo ./aws/install
 
   # AWS Configure 셋팅 및 로그인
-  aws configure set aws_access_key_id ABVSDASDA && \
-  aws configure set aws_secret_access_key ASDADASDASD && \
+  aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID} && \
+  aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY} && \
   aws configure set region ap-northeast-2 && \
   aws configure set output json
 fi
 
+# AWS CloudWatch를 사용하기 위한 Agent 다운로드
+if [ "${PROFILE}" != "dev" ] && [ ! -e 'tmp/amazon-cloudwatch-agent.deb' ];then
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-0] AWS CloudWatch Agent 다운로드" | tee -a deploy.log
+  wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb -P tmp
+fi
+
 echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-0] AWS ECR Private docker login" | tee -a deploy.log
-aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 6XXXXXXXXXX0.dkr.ecr.ap-northeast-2.amazonaws.com
+aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin ${AWS_ECR_PRIVATE_DOMAIN}
 
 DELAY_TIME=${DELAY_TIME:-30}
 echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-0] DELAY_TIME=${DELAY_TIME}" | tee -a deploy.log
@@ -56,7 +68,7 @@ DOCKER_COMPOSE_FILENAME=docker-compose
 export DOCKER_APP_NAME=${1:-skeleton-apis}
 echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-0] DOCKER_APP_NAME=${DOCKER_APP_NAME}" | tee -a deploy.log
 
-IMAGE_NAME="6XXXXXXXXXX0.dkr.ecr.ap-northeast-2.amazonaws.com/test/${DOCKER_APP_NAME}"
+IMAGE_NAME="${AWS_ECR_PRIVATE_DOMAIN}/test/${DOCKER_APP_NAME}"
 
 if [ "${PROFILE}" != "prod" ]; then
   IMAGE_NAME="${IMAGE_NAME}-${PROFILE}"
@@ -135,6 +147,9 @@ if [ -z "$EXIST_BLUE" ]; then
     # BLUE 컨테이너를 구동하기 위한 변수 설정
     export HOST_PORT=${BLUE_PORT}
     export CONTAINER_TYPE=blue
+    # [BLUE] container hostname 에 사용. ({ec2_instance_id}-{app_name}-{blue/green} docker-compose.yaml 파일)
+    export HOST_NAME="${EC2_ID}-${DOCKER_APP_NAME}-${CONTAINER_TYPE}"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-1] HOST_NAME=${HOST_NAME}" | tee -a deploy.log
 
     # BLUE 컨테이너 UP
     echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-1] BLUE UP PROCESS.." | tee -a deploy.log
@@ -148,6 +163,16 @@ if [ -z "$EXIST_BLUE" ]; then
     # BLUE 컨테이너가 구동되기까지 30초정도 대기
     echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-1] BLUE DETECT ${DELAY_TIME}S WAITING.."
     sleep ${DELAY_TIME}
+
+   # Run AWS Cloudwatch Agent (only for stage and production)
+    if [ "${PROFILE}" != "dev" ];then
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-1] AWS CloudWatch Agent UP PROCESS.." | tee -a deploy.log
+        docker exec -u 0 ${DOCKER_APP_NAME}-${CONTAINER_TYPE} sudo dpkg -i -E tmp/amazon-cloudwatch-agent.deb | tee -a deploy.log
+        # CollectD file setting for AWS Cloudwatch
+        docker exec -u 0 ${DOCKER_APP_NAME}-${CONTAINER_TYPE} sudo mkdir -p /usr/share/collectd | tee -a deploy.log
+        docker exec -u 0 ${DOCKER_APP_NAME}-${CONTAINER_TYPE} sudo touch /usr/share/collectd/types.db | tee -a deploy.log
+        docker exec -u 0 ${DOCKER_APP_NAME}-${CONTAINER_TYPE} sudo /opt/aws/amazon-cloudwatch-agent/bin/start-amazon-cloudwatch-agent &
+    fi
 
     EXIST_BLUE=$(docker ps --filter name=${DOCKER_APP_NAME}-blue --format "{{.ID}}")
     EXIST_GREEN=$(docker ps --filter name=${DOCKER_APP_NAME}-green --format "{{.ID}}")
@@ -168,8 +193,8 @@ if [ -z "$EXIST_BLUE" ]; then
 
         if [ -z "$PID" ]; then
           echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-2] PID Empty retry search ..." | tee -a deploy.log
-          echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-2] docker exec -u 0 ${DOCKER_APP_NAME}-${CONTAINER_TYPE}  ps -ef | grep app.jar | "'grep -v "grep" | awk "{print $2}"' | tee -a deploy.log
-          PID=$(docker exec -u 0 ${DOCKER_APP_NAME}-${CONTAINER_TYPE}  ps -ef | grep app.jar | grep -v 'grep' | awk '{print $2}')
+          echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-2] docker exec -u 0 ${DOCKER_APP_NAME}-${CONTAINER_TYPE} ps -ef | grep app.jar | "'grep -v "grep" | awk "{print $2}"' | tee -a deploy.log
+          PID=$(docker exec -u 0 ${DOCKER_APP_NAME}-${CONTAINER_TYPE} ps -ef | grep app.jar | grep -v 'grep' | awk '{print $2}')
         fi
 
         if [ -z "$PID" ]; then
@@ -181,7 +206,8 @@ if [ -z "$EXIST_BLUE" ]; then
         echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-2] SpringBoot Application PID=${PID}" | tee -a deploy.log
 
         ## 지워지지 않은 EUREKA REGISTRY 서비스 강제 삭제 처리를 위한 REGISTRY URI 생성
-        DELETE_REGISTRY=$(docker ps -f name=${DOCKER_APP_NAME}-${CONTAINER_TYPE} -q)
+        #DELETE_REGISTRY=$(docker ps -f name=${DOCKER_APP_NAME}-${CONTAINER_TYPE} -q)
+        DELETE_REGISTRY="${EC2_ID}-${DOCKER_APP_NAME}-${CONTAINER_TYPE}"
         echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-2] DELETE_REGISTRY=${DELETE_REGISTRY}" | tee -a deploy.log
         DELETE_REGISTRY_URI="${EUREKA_DOMAIN}/eureka/apps/${DOCKER_APP_NAME^^}/${DELETE_REGISTRY}:${DOCKER_APP_NAME}:${HOST_PORT}"
         echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-2] DELETE_REGISTRY_URI=${DELETE_REGISTRY_URI}" | tee -a deploy.log
@@ -216,6 +242,7 @@ else
     export CONTAINER_TYPE=green
     # [GREEN] container hostname 에 사용. ({ec2_instance_id}-{app_name}-{blue/green} docker-compose.yaml 파일)
     export HOST_NAME="${EC2_ID}-${DOCKER_APP_NAME}-${CONTAINER_TYPE}"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-1] HOST_NAME=${HOST_NAME}" | tee -a deploy.log
 
     # GREEN 컨테이너 UP
     echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-1] GREEN UP PROCESS.." | tee -a deploy.log
@@ -229,6 +256,16 @@ else
     # GREEN 컨테이너가 구동되기까지 30초정도 대기
     echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-1] GREEN DETECT ${DELAY_TIME}S WAITING.." | tee -a deploy.log
     sleep ${DELAY_TIME}
+
+    # Run AWS Cloudwatch Agent (only for stage and production)
+    if [ "${PROFILE}" != "dev" ];then
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-1] AWS CloudWatch Agent UP PROCESS.." | tee -a deploy.log
+        docker exec -u 0 ${DOCKER_APP_NAME}-${CONTAINER_TYPE} sudo dpkg -i -E tmp/amazon-cloudwatch-agent.deb | tee -a deploy.log
+        # CollectD file setting for AWS Cloudwatch
+        docker exec -u 0 ${DOCKER_APP_NAME}-${CONTAINER_TYPE} sudo mkdir -p /usr/share/collectd | tee -a deploy.log
+        docker exec -u 0 ${DOCKER_APP_NAME}-${CONTAINER_TYPE} sudo touch /usr/share/collectd/types.db | tee -a deploy.log
+        docker exec -u 0 ${DOCKER_APP_NAME}-${CONTAINER_TYPE} sudo /opt/aws/amazon-cloudwatch-agent/bin/start-amazon-cloudwatch-agent &
+    fi
 
     EXIST_BLUE=$(docker ps --filter name=${DOCKER_APP_NAME}-blue --format "{{.ID}}")
     EXIST_GREEN=$(docker ps --filter name=${DOCKER_APP_NAME}-green --format "{{.ID}}")
@@ -248,8 +285,8 @@ else
 
         if [ -z "$PID" ]; then
           echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-2] PID Empty retry search ..." | tee -a deploy.log
-          echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-2] docker exec -u 0 ${DOCKER_APP_NAME}-${CONTAINER_TYPE}  ps -ef | grep app.jar | "'grep -v "grep" | awk "{print $2}"' | tee -a deploy.log
-          PID=$(docker exec -u 0 ${DOCKER_APP_NAME}-${CONTAINER_TYPE}  ps -ef | grep app.jar | grep -v 'grep' | awk '{print $2}')
+          echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-2] docker exec -u 0 ${DOCKER_APP_NAME}-${CONTAINER_TYPE} ps -ef | grep app.jar | "'grep -v "grep" | awk "{print $2}"' | tee -a deploy.log
+          PID=$(docker exec -u 0 ${DOCKER_APP_NAME}-${CONTAINER_TYPE} ps -ef | grep app.jar | grep -v 'grep' | awk '{print $2}')
         fi
 
         if [ -z "$PID" ]; then
@@ -261,7 +298,8 @@ else
         echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-2] SpringBoot Application PID=${PID}" | tee -a deploy.log
 
         ## 지워지지 않은 EUREKA REGISTRY 서비스 강제 삭제 처리를 위한 REGISTRY URI 생성
-        DELETE_REGISTRY=$(docker ps -f name=${DOCKER_APP_NAME}-${CONTAINER_TYPE} -q)
+        #DELETE_REGISTRY=$(docker ps -f name=${DOCKER_APP_NAME}-${CONTAINER_TYPE} -q)
+        DELETE_REGISTRY="${EC2_ID}-${DOCKER_APP_NAME}-${CONTAINER_TYPE}"
         echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-2] DELETE_REGISTRY=${DELETE_REGISTRY}" | tee -a deploy.log
         DELETE_REGISTRY_URI="${EUREKA_DOMAIN}/eureka/apps/${DOCKER_APP_NAME^^}/${DELETE_REGISTRY}:${DOCKER_APP_NAME}:${HOST_PORT}"
         echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-2] DELETE_REGISTRY_URI=${DELETE_REGISTRY_URI}" | tee -a deploy.log
