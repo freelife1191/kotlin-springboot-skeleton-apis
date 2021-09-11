@@ -51,7 +51,6 @@ dependencies {
     val springCloudStarterAwsVersion = "2.2.6.RELEASE"
     // Spring Cloud
     implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
-    // implementation("org.springframework.cloud:spring-cloud-starter-netflix-hystrix")
     implementation("org.springframework.cloud:spring-cloud-starter-sleuth")
     implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
     implementation("org.springframework.cloud:spring-cloud-starter-config")
@@ -71,7 +70,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-rest")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-web")
-    // implementation("org.projectlombok:lombok:1.18.16")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
