@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    val kotlinVersion = "1.5.21"
+    val kotlinVersion = "1.5.30"
 
     kotlin("jvm") version kotlinVersion
     kotlin("kapt") version kotlinVersion
@@ -10,7 +10,7 @@ plugins {
     kotlin("plugin.noarg") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
 
-    id("org.springframework.boot") version "2.5.3"
+    id("org.springframework.boot") version "2.5.4"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
 }
 
@@ -52,7 +52,7 @@ dependencies {
     // Spring Cloud
     implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
     // implementation("org.springframework.cloud:spring-cloud-starter-netflix-hystrix")
-    // implementation("org.springframework.cloud:spring-cloud-starter-sleuth")
+    implementation("org.springframework.cloud:spring-cloud-starter-sleuth")
     implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
     implementation("org.springframework.cloud:spring-cloud-starter-config")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
@@ -92,7 +92,7 @@ dependencies {
 
     val slackWebhookVersion = "1.4.0"
     val userAgentUtilsVersion = "1.21"
-    val gsonVersion = "2.8.6"
+    val gsonVersion = "2.8.8"
     // Slack Messanger: https://github.com/gpedro/slack-webhook
     implementation("net.gpedro.integrations.slack:slack-webhook:${slackWebhookVersion}")
     implementation("eu.bitwalker:UserAgentUtils:${userAgentUtilsVersion}")
@@ -104,7 +104,7 @@ dependencies {
     implementation("org.apache.poi:poi-ooxml:$poiVersion")
     implementation("com.github.drapostolos:type-parser:${typeParserVersion}")
 
-    val commonsPool2Version = "2.9.0"
+    val commonsPool2Version = "2.10.0"
     val commonsLang3Version = "3.12.0"
     val commonsTextVersion = "1.9"
     val commonsFileuploadVersion = "1.4"
@@ -122,15 +122,13 @@ dependencies {
     // REDIS
     // implementation("org.springframework.boot:spring-boot-starter-data-redis")
 
+    val hibernateTypes52Version = "2.12.1"
     //DB
     implementation("mysql:mysql-connector-java")
     implementation("com.querydsl:querydsl-jpa") // querydsl
-    implementation("com.vladmihalcea:hibernate-types-52:2.10.4")
-    //    implementation("com.querydsl:querydsl-mongodb")
-    //     implementation("com.vladmihalcea:hibernate-types-52:2.10.4")
+    implementation("com.vladmihalcea:hibernate-types-52:${hibernateTypes52Version}")
     kapt(group = "com.querydsl", name = "querydsl-apt", classifier = "jpa") // querydsl
     annotationProcessor(group = "com.querydsl", name = "querydsl-apt", classifier = "jpa")
-    //    implementation( "com.google.code.gson:gson:2.8.6")
     runtimeOnly("com.h2database:h2")
     // Querydsl 경로 설정
     sourceSets.main {
@@ -146,7 +144,8 @@ dependencies {
     // val modelmapperVersion = "2.4.1"
     // implementation("org.modelmapper:modelmapper:$modelmapperVersion")
 
-    val kotlinxSerializationJsonVersion = "1.1.0"
+    val kotlinxSerializationJsonVersion = "1.2.2"
+    val kotlinxCoroutinesCoreVersion = "1.5.1"
     // 코틀린
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation(kotlin("stdlib-jdk8"))
@@ -155,6 +154,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerializationJsonVersion")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     // implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    val jacksonVersion = "2.12.4"
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
     // JWT
     implementation( "io.jsonwebtoken:jjwt-api:0.11.2")
@@ -178,12 +179,6 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("com.ninja-squad:springmockk:${springmockkVersion}")
     testImplementation("io.findify:s3mock_2.13:${s3mockVersion}")
-}
-
-dependencyManagement {
-    imports {
-        mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
-    }
 }
 
 tasks.withType<KotlinCompile> {

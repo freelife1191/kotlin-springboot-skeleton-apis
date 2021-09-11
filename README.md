@@ -4,8 +4,8 @@
 
 ## Spec
 - **SpringCloud 2020.0.3**
-- **SpringBoot 2.5.3**
-- **Kotlin 1.5.21**
+- **SpringBoot 2.5.4**
+- **Kotlin 1.5.30**
 - **JAVA 11**
 - **Gradle 7.1.1**
 - **Build: Kotlin Gradle(kts)**

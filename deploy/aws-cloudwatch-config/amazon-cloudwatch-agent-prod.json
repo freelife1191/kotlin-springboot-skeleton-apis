@@ -81,7 +81,7 @@
       },
       "procstat": [
         {
-          "pattern": "java",
+          "pattern": "app.jar",
           "measurement": ["pid", "pid_count", "cpu_usage", "memory_data", "memory_locked", "memory_rss", "memory_stack"]
         }
       ]

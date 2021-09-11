@@ -164,14 +164,14 @@ if [ -z "$EXIST_BLUE" ]; then
     echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-1] BLUE DETECT ${DELAY_TIME}S WAITING.."
     sleep ${DELAY_TIME}
 
-   # Run AWS Cloudwatch Agent (only for stage and production)
+    # Run AWS Cloudwatch Agent (only for stage and production)
     if [ "${PROFILE}" != "dev" ];then
         echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-1] AWS CloudWatch Agent UP PROCESS.." | tee -a deploy.log
         docker exec -u 0 ${DOCKER_APP_NAME}-${CONTAINER_TYPE} sudo dpkg -i -E tmp/amazon-cloudwatch-agent.deb | tee -a deploy.log
         # CollectD file setting for AWS Cloudwatch
         docker exec -u 0 ${DOCKER_APP_NAME}-${CONTAINER_TYPE} sudo mkdir -p /usr/share/collectd | tee -a deploy.log
         docker exec -u 0 ${DOCKER_APP_NAME}-${CONTAINER_TYPE} sudo touch /usr/share/collectd/types.db | tee -a deploy.log
-        docker exec -u 0 ${DOCKER_APP_NAME}-${CONTAINER_TYPE} sudo /opt/aws/amazon-cloudwatch-agent/bin/start-amazon-cloudwatch-agent &
+        nohup docker exec -u 0 ${DOCKER_APP_NAME}-${CONTAINER_TYPE} sudo /opt/aws/amazon-cloudwatch-agent/bin/start-amazon-cloudwatch-agent 1>/dev/null 2>&1 &
     fi
 
     EXIST_BLUE=$(docker ps --filter name=${DOCKER_APP_NAME}-blue --format "{{.ID}}")
@@ -207,10 +207,15 @@ if [ -z "$EXIST_BLUE" ]; then
 
         ## 지워지지 않은 EUREKA REGISTRY 서비스 강제 삭제 처리를 위한 REGISTRY URI 생성
         #DELETE_REGISTRY=$(docker ps -f name=${DOCKER_APP_NAME}-${CONTAINER_TYPE} -q)
+        #DELETE_REGISTRY="${SERVER_IP}"
         DELETE_REGISTRY="${EC2_ID}-${DOCKER_APP_NAME}-${CONTAINER_TYPE}"
         echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-2] DELETE_REGISTRY=${DELETE_REGISTRY}" | tee -a deploy.log
         DELETE_REGISTRY_URI="${EUREKA_DOMAIN}/eureka/apps/${DOCKER_APP_NAME^^}/${DELETE_REGISTRY}:${DOCKER_APP_NAME}:${HOST_PORT}"
         echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-2] DELETE_REGISTRY_URI=${DELETE_REGISTRY_URI}" | tee -a deploy.log
+
+        ## 지워지지 않은 EUREKA REGISTRY 서비스 강제 삭제 처리
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-2] curl -X DELETE ${DELETE_REGISTRY_URI}" | tee -a deploy.log
+        curl -X DELETE "${DELETE_REGISTRY_URI}" | tee -a deploy.log
 
         # GREEN APPLICATION 정상종료 시그널 전송
         echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-2] docker-compose -p ${DOCKER_APP_NAME}-${CONTAINER_TYPE} -f ./${DOCKER_COMPOSE_FILENAME}.yml exec -T ${DOCKER_APP_NAME} kill -15 ${PID}" | tee -a deploy.log
@@ -264,7 +269,7 @@ else
         # CollectD file setting for AWS Cloudwatch
         docker exec -u 0 ${DOCKER_APP_NAME}-${CONTAINER_TYPE} sudo mkdir -p /usr/share/collectd | tee -a deploy.log
         docker exec -u 0 ${DOCKER_APP_NAME}-${CONTAINER_TYPE} sudo touch /usr/share/collectd/types.db | tee -a deploy.log
-        docker exec -u 0 ${DOCKER_APP_NAME}-${CONTAINER_TYPE} sudo /opt/aws/amazon-cloudwatch-agent/bin/start-amazon-cloudwatch-agent &
+        nohup docker exec -u 0 ${DOCKER_APP_NAME}-${CONTAINER_TYPE} sudo /opt/aws/amazon-cloudwatch-agent/bin/start-amazon-cloudwatch-agent 1>/dev/null 2>&1 &
     fi
 
     EXIST_BLUE=$(docker ps --filter name=${DOCKER_APP_NAME}-blue --format "{{.ID}}")
@@ -277,6 +282,8 @@ else
         # BLUE 컨테이너를 구동하기 위한 변수 설정
         export HOST_PORT=${BLUE_PORT}
         export CONTAINER_TYPE=blue
+        # [BLUE] container hostname 에 사용. ({ec2_instance_id}-{app_name}-{blue/green} docker-compose.yaml 파일)
+        export HOST_NAME="${EC2_ID}-${DOCKER_APP_NAME}-${CONTAINER_TYPE}"
 
         # BLUE APPLICATION Graceful Shutdown
         echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-2] Blue Graceful Shutdown Start..." | tee -a deploy.log
@@ -299,10 +306,15 @@ else
 
         ## 지워지지 않은 EUREKA REGISTRY 서비스 강제 삭제 처리를 위한 REGISTRY URI 생성
         #DELETE_REGISTRY=$(docker ps -f name=${DOCKER_APP_NAME}-${CONTAINER_TYPE} -q)
+        #DELETE_REGISTRY="${SERVER_IP}"
         DELETE_REGISTRY="${EC2_ID}-${DOCKER_APP_NAME}-${CONTAINER_TYPE}"
         echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-2] DELETE_REGISTRY=${DELETE_REGISTRY}" | tee -a deploy.log
         DELETE_REGISTRY_URI="${EUREKA_DOMAIN}/eureka/apps/${DOCKER_APP_NAME^^}/${DELETE_REGISTRY}:${DOCKER_APP_NAME}:${HOST_PORT}"
         echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-2] DELETE_REGISTRY_URI=${DELETE_REGISTRY_URI}" | tee -a deploy.log
+
+        ## 지워지지 않은 EUREKA REGISTRY 서비스 강제 삭제 처리
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-2] curl -X DELETE ${DELETE_REGISTRY_URI}" | tee -a deploy.log
+        curl -X DELETE "${DELETE_REGISTRY_URI}" | tee -a deploy.log
 
         # BLUE APPLICATION 정상종료 시그널 전송
         echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-2] docker-compose -p ${DOCKER_APP_NAME}-${CONTAINER_TYPE} -f ./${DOCKER_COMPOSE_FILENAME}.yml exec -T ${DOCKER_APP_NAME} kill -15 ${PID}" | tee -a deploy.log
