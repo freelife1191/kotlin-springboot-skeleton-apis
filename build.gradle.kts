@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    val kotlinVersion = "1.5.30"
+    val kotlinVersion = "1.5.31"
 
     kotlin("jvm") version kotlinVersion
     kotlin("kapt") version kotlinVersion
@@ -10,7 +10,7 @@ plugins {
     kotlin("plugin.noarg") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
 
-    id("org.springframework.boot") version "2.5.4"
+    id("org.springframework.boot") version "2.5.5"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
 }
 
@@ -76,7 +76,7 @@ dependencies {
     // AOP
     //    implementation("org.springframework.boot:spring-boot-starter-aop")
 
-    val springdocVersion = "1.5.10"
+    val springdocVersion = "1.5.11"
     //Swagger OpenAPI 3.0
     // GitHub: https://github.com/springdoc/springdoc-openapi
     // DEMO: https://github.com/springdoc/springdoc-openapi-demos
@@ -134,6 +134,11 @@ dependencies {
             kotlin.srcDir("$buildDir/generated/source/kapt/main")
         }
     }
+
+    // https://kaiso.github.io/relmongo/
+    // MongoDB 릴레이션 맵핑 라이브러리
+    val relmongoVersion = "3.4.2"
+    implementation("io.github.kaiso.relmongo:relmongo:${relmongoVersion}")
     val p6spyVersion = "1.6.3"
     // JPA 로그 출력
     implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:${p6spyVersion}")

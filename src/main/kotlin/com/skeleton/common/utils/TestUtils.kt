@@ -15,23 +15,22 @@ class TestUtils {
          * @return MultiValueMap<String, String>
          */
         @Throws(Exception::class)
-        inline fun <reified T: Any> paramMapper(dto: T): MultiValueMap<String, String> {
-            val paramMap: MutableMap<String, String> =
-                MapperUtils.convertValueSnakeCase(dto, MutableMap::class) as MutableMap<String, String>
-            /*
-            dto.javaClass.kotlin.memberProperties.forEach {
-                val data = it.getter.call(dto)
-                if(data is Map<*, *>)
-                    paramMap[it.name] = JsonUtils.toMapperJson(data)
-                // println("## ${it.name}, type = ${it.getter.call(dto) }")
-            }
-            */
+        fun <T> paramMapper(dto: T): MultiValueMap<String, String> {
+            val paramMap: MutableMap<String, Any> =
+                MapperUtils.convertValueSnakeCase(dto!!, Map::class) as MutableMap<String, Any>
             val multiValueMap: MultiValueMap<String, String> = LinkedMultiValueMap()
+            // List타입의 데이터의 경우 별도로 add 처리로 데이터를 담는다
+            paramMap.keys
+                .filter { paramMap[it] is ArrayList<*> }
+                .forEach {
+                    (paramMap[it] as ArrayList<*>).forEach {data ->
+                        multiValueMap.add(it, data.toString()) }
+                    paramMap.remove(it)} // 성능향상을 위해 처리한 데이터는 삭제처리
+            //List타입의 데이터가 아니면 그대로 setAll 처리 한다
             multiValueMap.setAll(
                 paramMap.keys
-                    .filter { paramMap[it] != null }
-                    .associateWith { paramMap[it].toString() }
-            )
+                    .filter { paramMap[it] !is ArrayList<*> && paramMap[it] != null }
+                    .associateWith { paramMap[it].toString() })
             return multiValueMap
         }
     }

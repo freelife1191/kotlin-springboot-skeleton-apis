@@ -185,6 +185,7 @@ if [ -z "$EXIST_BLUE" ]; then
         export CONTAINER_TYPE=green
         # [BLUE] container hostname 에 사용. ({ec2_instance_id}-{app_name}-{blue/green} docker-compose.yaml 파일)
         export HOST_NAME="${EC2_ID}-${DOCKER_APP_NAME}-${CONTAINER_TYPE}"
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-2] HOST_NAME=${HOST_NAME}" | tee -a deploy.log
 
         # GREEN APPLICATION Graceful Shutdown
         echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-2] Green Graceful Shutdown Start..." | tee -a deploy.log
@@ -284,6 +285,7 @@ else
         export CONTAINER_TYPE=blue
         # [BLUE] container hostname 에 사용. ({ec2_instance_id}-{app_name}-{blue/green} docker-compose.yaml 파일)
         export HOST_NAME="${EC2_ID}-${DOCKER_APP_NAME}-${CONTAINER_TYPE}"
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-2] HOST_NAME=${HOST_NAME}" | tee -a deploy.log
 
         # BLUE APPLICATION Graceful Shutdown
         echo "[$(date '+%Y-%m-%d %H:%M:%S')][STEP-2] Blue Graceful Shutdown Start..." | tee -a deploy.log

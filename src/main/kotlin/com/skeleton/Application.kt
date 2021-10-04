@@ -1,5 +1,6 @@
 package com.skeleton
 
+import io.github.kaiso.relmongo.config.EnableRelMongo
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.runApplication
@@ -13,7 +14,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement
 @EnableFeignClients
 @EnableJpaAuditing
 @ConfigurationPropertiesScan
-@EnableTransactionManagement
+@EnableRelMongo
 class Application
 
 fun main(args: Array<String>) {

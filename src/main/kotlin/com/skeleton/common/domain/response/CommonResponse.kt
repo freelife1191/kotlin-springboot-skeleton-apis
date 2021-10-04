@@ -1,5 +1,6 @@
 package com.skeleton.common.domain.response
 
+import com.skeleton.common.exception.domain.enums.ErrorCode
 import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.http.HttpStatus
 
@@ -23,6 +24,10 @@ class CommonResponse<T>(
     constructor(httpStatus: HttpStatus, message: String? = null) : this(httpStatus.value(), message ?: httpStatus.reasonPhrase, null)
 
     constructor(httpStatus: HttpStatus, content: T) : this(httpStatus.value(), httpStatus.reasonPhrase, content)
+
+    constructor(errorCode: ErrorCode, message: String? = null) : this(errorCode.code, message ?: errorCode.message, null)
+
+    constructor(errorCode: ErrorCode, content: T) : this(errorCode.code, errorCode.message, content)
 
     constructor(res: CommonFeignClientResponse<T>): this(res.code, res.message, res.content)
 
