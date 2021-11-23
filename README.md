@@ -4,12 +4,12 @@
 
 ## Spec
 - **SpringCloud 2020.0.3**
-- **SpringBoot 2.5.5**
-- **Kotlin 1.5.31**
+- **SpringBoot 2.5.7**
+- **Kotlin 1.6.0**
 - **JAVA 11**
-- **Gradle 7.2**
+- **Gradle 7.3**
 - **Build: Kotlin Gradle(kts)**
-- **Swagger SpringDoc OpenAPI 1.5.11**
+- **Swagger SpringDoc OpenAPI 1.5.12**
 
 ## 배포
 1. Jenkins를 통해 Dockerfile 로 이미지를 생성해서 AWS ECR에 PUSH

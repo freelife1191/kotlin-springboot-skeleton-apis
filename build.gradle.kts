@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    val kotlinVersion = "1.5.31"
+    val kotlinVersion = "1.6.0"
 
     kotlin("jvm") version kotlinVersion
     kotlin("kapt") version kotlinVersion
@@ -10,7 +10,7 @@ plugins {
     kotlin("plugin.noarg") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
 
-    id("org.springframework.boot") version "2.5.5"
+    id("org.springframework.boot") version "2.5.7"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
 }
 
@@ -76,7 +76,7 @@ dependencies {
     // AOP
     //    implementation("org.springframework.boot:spring-boot-starter-aop")
 
-    val springdocVersion = "1.5.11"
+    val springdocVersion = "1.5.12"
     //Swagger OpenAPI 3.0
     // GitHub: https://github.com/springdoc/springdoc-openapi
     // DEMO: https://github.com/springdoc/springdoc-openapi-demos
@@ -90,23 +90,23 @@ dependencies {
 
     val slackWebhookVersion = "1.4.0"
     val userAgentUtilsVersion = "1.21"
-    val gsonVersion = "2.8.8"
+    val gsonVersion = "2.8.9"
     // Slack Messanger: https://github.com/gpedro/slack-webhook
     implementation("net.gpedro.integrations.slack:slack-webhook:${slackWebhookVersion}")
     implementation("eu.bitwalker:UserAgentUtils:${userAgentUtilsVersion}")
     implementation("com.google.code.gson:gson:${gsonVersion}")
 
-    val poiVersion = "5.0.0"
+    val poiVersion = "5.1.0"
     val typeParserVersion = "0.7.0"
     implementation("org.apache.poi:poi:$poiVersion")
     implementation("org.apache.poi:poi-ooxml:$poiVersion")
     implementation("com.github.drapostolos:type-parser:${typeParserVersion}")
 
-    val commonsPool2Version = "2.10.0"
+    val commonsPool2Version = "2.11.1"
     val commonsLang3Version = "3.12.0"
     val commonsTextVersion = "1.9"
     val commonsFileuploadVersion = "1.4"
-    val commonsIoVersion = "2.8.0"
+    val commonsIoVersion = "2.11.0"
     val commonsCodecVersion = "1.15"
 
     // Apache Commons
@@ -120,7 +120,7 @@ dependencies {
     // REDIS
     // implementation("org.springframework.boot:spring-boot-starter-data-redis")
 
-    val hibernateTypes52Version = "2.12.1"
+    val hibernateTypes52Version = "2.14.0"
     //DB
     implementation("mysql:mysql-connector-java")
     implementation("com.querydsl:querydsl-jpa") // querydsl
@@ -139,7 +139,7 @@ dependencies {
     // MongoDB 릴레이션 맵핑 라이브러리
     val relmongoVersion = "3.4.2"
     implementation("io.github.kaiso.relmongo:relmongo:${relmongoVersion}")
-    val p6spyVersion = "1.6.3"
+    val p6spyVersion = "1.7.1"
     // JPA 로그 출력
     implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:${p6spyVersion}")
 
@@ -147,7 +147,7 @@ dependencies {
     // val modelmapperVersion = "2.4.1"
     // implementation("org.modelmapper:modelmapper:$modelmapperVersion")
 
-    val kotlinxSerializationJsonVersion = "1.2.2"
+    val kotlinxSerializationJsonVersion = "1.3.1"
     val kotlinxCoroutinesCoreVersion = "1.5.1"
     // 코틀린
     implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -178,6 +178,8 @@ dependencies {
     // val junitPlatformVersion = "1.1.0"
     // val kotlinVersion = "1.5.0"
 
+    // 테스트 MongoDB
+    implementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo")
     // 테스트
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("com.ninja-squad:springmockk:${springmockkVersion}")

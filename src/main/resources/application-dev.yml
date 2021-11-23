@@ -2,11 +2,32 @@ logging:
   config: classpath:logs/logback-dev.xml
 
 spring:
+  datasource:
+    #url: jdbc:postgresql://localhost:5432/postgres
+    url: jdbc:mysql://database:3306/company?serverTimezone=Asia/Seoul&useSSL=false&rewriteBatchedStatements=true
+    username: id
+    password: password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    mongodb:
+      uri: mongodb+srv://id:password@cluster0.abcd.mongodb.net/mongo?retryWrites=true&w=majority
+      database: mongo
   jpa:
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: com.vladmihalcea.hibernate.type.util.CamelCaseToSnakeCaseNamingStrategy
     properties:
       hibernate:
         format_sql: true
-
+        default_batch_fetch_size: 100
+        #        jdbc:
+        #          batch_size: 100
+        #          batch_versioned_data: true
+        order_inserts: true
+        order_updates: true
+    database: mysql
+    database-platform: com.skeleton.common.config.MySQLCustomDialect
 eureka:
   instance:
     # 서비스 이름 대신 IP 주소 등록

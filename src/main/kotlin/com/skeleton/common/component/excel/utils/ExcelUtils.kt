@@ -2,23 +2,21 @@ package com.skeleton.common.component.excel.utils
 
 import com.github.drapostolos.typeparser.TypeParser
 import com.github.drapostolos.typeparser.TypeParserException
-import com.skeleton.common.utils.ValidationUtils
 import com.skeleton.common.component.excel.constant.ExcelReaderFieldError
 import com.skeleton.common.component.excel.domain.model.ExcelReaderErrorField
 import com.skeleton.common.component.excel.service.ExcelReader
+import com.skeleton.common.utils.ValidationUtils
 import eu.bitwalker.useragentutils.Browser
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.poi.ss.formula.eval.ErrorEval
-import org.apache.poi.ss.usermodel.Cell
-import org.apache.poi.ss.usermodel.CellType
-import org.apache.poi.ss.usermodel.DateUtil
-import org.apache.poi.ss.usermodel.Row
+import org.apache.poi.ss.usermodel.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.UnsupportedEncodingException
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import java.text.NumberFormat
 import java.util.*
 import java.util.function.Function
 import java.util.function.UnaryOperator
@@ -30,6 +28,7 @@ import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaField
+
 
 /**
  * Created by KMS on 2021/05/26.
@@ -158,13 +157,32 @@ class ExcelUtils {
          */
         fun getValue(cell: Cell): String? {
             if (Objects.isNull(cell) || Objects.isNull(cell.cellType)) return ""
+
+            // 소수점 데이터를 그대로 보여주기 위한 설정
+            // 소수점 데이터를 그대로 보여주기 위한 설정
+            val df = DataFormatter()
+            // 지수표현식을 풀기위한 설정
+            // 지수표현식을 풀기위한 설정
+            val f: NumberFormat = NumberFormat.getInstance()
+            f.isGroupingUsed = false
+
             var value: String
             when (cell.cellType) {
                 CellType.STRING -> value = cell.richStringCellValue.string
                 CellType.NUMERIC -> {
-                    if (DateUtil.isCellDateFormatted(cell)) value = cell.localDateTimeCellValue.toString() else value =
-                        cell.numericCellValue.toString()
-                    if (value.endsWith(".0")) value = value.substring(0, value.length - 2)
+                    if (DateUtil.isCellDateFormatted(cell))
+                        value = cell.localDateTimeCellValue.toString()
+                    else {
+                        //value = cell.numericCellValue.toString()
+                        // 소수점 데이터를 String으로 표현
+                        value = df.formatCellValue(cell);
+                    }
+                    // 지수가 있으면 지수 푸는 코드 적용
+                    if (value.matches(Regex(".*[a-zA-Z+-].*"))) {
+                        value = String.format(f.format(cell.numericCellValue))
+                    }
+                    if (value.endsWith(".0"))
+                        value = value.substring(0, value.length - 2)
                 }
                 CellType.BOOLEAN -> value = cell.booleanCellValue.toString()
                 CellType.FORMULA -> value = cell.cellFormula.toString()
